@@ -1,6 +1,6 @@
 # python-toolkit
 
-フォルダ構成
+## フォルダ構成
 
 python-toolkit/
 ├── README.md               # リポジトリ全体の概要、環境構築方法
