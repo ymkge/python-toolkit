@@ -3,8 +3,7 @@ import sys
 import os
 import csv
 
-def split_tsv(input_file):
-    rows_per_file = 30000 
+def split_tsv(input_file, rows_per_file=30000):
     max_char_limit = 45000 
 
     if not os.path.exists(input_file):
@@ -45,7 +44,21 @@ def split_tsv(input_file):
         print(f"実行エラー: {e}")
 
 if __name__ == "__main__":
-    if len(sys.argv) > 1:
-        split_tsv(sys.argv[1])
+    if len(sys.argv) < 2:
+        print("使用法: python3 tsv_split.py [ファイル名.tsv] [オプション: 1ファイルあたりの行数]")
+        sys.exit(1)
+
+    input_file = sys.argv[1]
+    
+    if len(sys.argv) > 2:
+        try:
+            rows_to_split = int(sys.argv[2])
+            if rows_to_split <= 0:
+                print("エラー: 行数は正の整数である必要があります。")
+                sys.exit(1)
+            split_tsv(input_file, rows_to_split)
+        except ValueError:
+            print("エラー: 行数には整数を指定してください。")
+            sys.exit(1)
     else:
-        print("使用法: python3 split_tsv.py [ファイル名.tsv]")
+        split_tsv(input_file)
