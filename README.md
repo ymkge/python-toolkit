@@ -2,6 +2,7 @@
 
 ## フォルダ構成
 
+```
 python-toolkit/
 ├── README.md               # リポジトリ全体の概要、環境構築方法
 ├── requirements.txt        # 必要なライブラリ一覧
@@ -29,3 +30,4 @@ python-toolkit/
 │
 └── templates/              # 【雛形】
     └── basic_script.py     # 新しくツールを作る際のテンプレート
+```
