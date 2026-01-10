@@ -4,7 +4,7 @@ import os
 import csv
 
 def split_tsv(input_file):
-    rows_per_file = 100000 
+    rows_per_file = 30000 
     max_char_limit = 45000 
 
     if not os.path.exists(input_file):
