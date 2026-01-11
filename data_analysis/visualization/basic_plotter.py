@@ -14,16 +14,16 @@ from utils.logger import get_logger
 # ロガーを取得
 logger = get_logger(__name__)
 
-def create_plot(input_path: str, output_path: str, plot_type: str, x_col: str, y_col: str, hue_col: str = None):
+def create_plot(input_path: str, output_path: str, plot_type: str, x_col: str, y_col: str = None, hue_col: str = None):
     """
     CSVデータからグラフを生成し、画像として保存します。
 
     Args:
         input_path (str): 入力CSVファイルのパス。
         output_path (str): 出力画像ファイルのパス。
-        plot_type (str): グラフの種類 ('bar' または 'scatter')。
+        plot_type (str): グラフの種類 ('bar', 'scatter', 'histogram')。
         x_col (str): X軸に対応するカラム名。
-        y_col (str): Y軸に対応するカラム名。
+        y_col (str, optional): Y軸に対応するカラム名。棒グラフと散布図では必須。
         hue_col (str, optional): 色分けに使用するカラム名。デフォルトはNone。
     """
     try:
@@ -35,19 +35,30 @@ def create_plot(input_path: str, output_path: str, plot_type: str, x_col: str, y
         sns.set_theme(style="whitegrid")
         plt.figure(figsize=(10, 6))
 
-        logger.info(f"'{plot_type}' グラフの生成を開始します (X='{x_col}', Y='{y_col}').")
+        log_y_col = f", Y='{y_col}'" if y_col else ""
+        logger.info(f"'{plot_type}' グラフの生成を開始します (X='{x_col}'{log_y_col}).")
+
+        if plot_type in ['bar', 'scatter'] and not y_col:
+            logger.error(f"エラー: '{plot_type}' グラフには --y (Y軸) の指定が必要です。")
+            return
 
         if plot_type == 'bar':
             sns.barplot(data=df, x=x_col, y=y_col, hue=hue_col)
+            plt.title(f'Bar Plot: {y_col} vs {x_col}')
+            plt.ylabel(y_col)
         elif plot_type == 'scatter':
             sns.scatterplot(data=df, x=x_col, y=y_col, hue=hue_col)
+            plt.title(f'Scatter Plot: {y_col} vs {x_col}')
+            plt.ylabel(y_col)
+        elif plot_type == 'histogram':
+            sns.histplot(data=df, x=x_col, hue=hue_col, kde=True) # kde=Trueで密度曲線を追加
+            plt.title(f'Histogram of {x_col}')
+            plt.ylabel('Frequency')
         else:
-            logger.error(f"エラー: 未知のグラフ種類 '{plot_type}'。'bar' または 'scatter' を指定してください。")
+            logger.error(f"エラー: 未知のグラフ種類 '{plot_type}'。")
             return
 
-        plt.title(f'{plot_type.capitalize()} Plot: {y_col} vs {x_col}')
         plt.xlabel(x_col)
-        plt.ylabel(y_col)
         plt.xticks(rotation=45)
         plt.tight_layout() # ラベルが重ならないように調整
 
@@ -68,9 +79,9 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='CSVデータから基本的なグラフを生成するツール')
     parser.add_argument('input', help='入力CSVファイルのパス')
     parser.add_argument('output', help='出力画像ファイルのパス (例: my_plot.png)')
-    parser.add_argument('--type', required=True, choices=['bar', 'scatter'], help='生成するグラフの種類')
+    parser.add_argument('--type', required=True, choices=['bar', 'scatter', 'histogram'], help='生成するグラフの種類')
     parser.add_argument('--x', required=True, help='X軸として使用するカラム名')
-    parser.add_argument('--y', required=True, help='Y軸として使用するカラム名')
+    parser.add_argument('--y', required=False, help='Y軸として使用するカラム名 (bar, scatterで必須)')
     parser.add_argument('--hue', default=None, help='色分けに使用するカラム名 (オプション)')
 
     args = parser.parse_args()
