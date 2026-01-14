@@ -37,7 +37,7 @@
 
 - **[データ分析 (Data Analysis)](./data_analysis/README.md)**
   - データを分析し、可視化するためのツールやテンプレートです。
-  - 実装済みツール: `basic_plotter` (棒グラフ, 散布図, ヒストグラム生成)
+  - 実装済みツール: `basic_plotter` (棒グラフ, 散布図, ヒストグラム, 箱ひげ図生成)
 
 - **[インフラ構築・運用 (Infrastructure)](./infrastructure/README.md)**
   - サーバーやクラウド環境の運用を自動化するスクリプト群です。
@@ -75,7 +75,6 @@
 以下のいずれかの方向性で開発を進めることができます。
 
 1.  **既存ツールの機能拡充**:
-    *   `basic_plotter`に**箱ひげ図 (Box Plot)** を追加する。
     *   `access_log_parser`でより詳細な集計（例: リクエストパスごとのアクセス数）に対応する。
     *   `tsv_splitter`にCSV形式の分割機能を追加する。
 
