@@ -18,9 +18,14 @@ python3 access_log_parser.py [ログファイル] [オプション]
 
 #### コマンド例
 
-- **IPアドレスごとのアクセス回数を集計**
+- **IPアドレスごとのアクセス回数を集計 (デフォルト)**
   ```bash
   python3 access_log_parser.py access.log
+  ```
+
+- **リクエストパスごとのアクセス回数を集計**
+  ```bash
+  python3 access_log_parser.py access.log --report-by path
   ```
 
 - **特定のIPアドレスのアクセス記録を抽出**
@@ -36,6 +41,7 @@ python3 access_log_parser.py [ログファイル] [オプション]
 #### 引数
 
 - `logfile`: (必須) 解析対象のアクセスログファイルパス。
+- `--report-by`: (任意) 集計キーを選択します。`ip` (IPアドレス別) または `path` (リクエストパス別) を指定できます。デフォルトは `ip` です。
 - `--ip`: (任意) 抽出したいIPアドレスを指定します。
 - `--status`: (任意) 抽出したいHTTPステータスコードを指定します。
 
