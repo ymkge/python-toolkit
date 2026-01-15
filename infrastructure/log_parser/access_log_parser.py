@@ -17,7 +17,7 @@ logger = get_logger(__name__)
 # 例: 127.0.0.1 - - [10/Oct/2000:13:55:36 +0000] "GET /apache_pb.gif HTTP/1.0" 200 2326
 LOG_REGEX = re.compile(r'^(?P<ip>[\d\.]+) \S+ \S+ \[(?P<datetime>[^\]]+)\] "(?P<request>[^"]+)" (?P<status>\d{3}) (?P<size>\d+)$')
 
-def parse_log_file(log_path: str, filter_ip: str = None, filter_status: int = None):
+def parse_log_file(log_path: str, filter_ip: str = None, filter_status: int = None, report_by: str = 'ip'):
     """
     アクセスログファイルを解析し、情報を集計・表示します。
 
@@ -25,6 +25,7 @@ def parse_log_file(log_path: str, filter_ip: str = None, filter_status: int = No
         log_path (str): 解析対象のログファイルパス。
         filter_ip (str, optional): 抽出するIPアドレス。デフォルトはNone。
         filter_status (int, optional): 抽出するHTTPステータスコード。デフォルトはNone。
+        report_by (str, optional): 集計キー ('ip' または 'path')。デフォルトは 'ip'。
     """
     try:
         logger.info(f"ログファイル '{log_path}' の解析を開始します。")
@@ -39,6 +40,10 @@ def parse_log_file(log_path: str, filter_ip: str = None, filter_status: int = No
                 
                 log_data = match.groupdict()
                 
+                # リクエストパスを抽出
+                request_parts = log_data['request'].split()
+                log_data['path'] = request_parts[1] if len(request_parts) > 1 else ''
+
                 # フィルタリング
                 if filter_ip and log_data['ip'] != filter_ip:
                     continue
@@ -67,11 +72,18 @@ def parse_log_file(log_path: str, filter_ip: str = None, filter_status: int = No
                 print(f"  - IP: {ip}, 回数: {count}")
 
         else:
-            # フィルタ指定がない場合は、IPアドレスごとのアクセス回数を集計
-            print("IPアドレスごとのアクセス回数:")
-            ip_counter = Counter(log['ip'] for log in matched_lines)
-            for ip, count in ip_counter.most_common():
-                print(f"  - {ip}: {count}回")
+            if report_by == 'path':
+                # リクエストパスごとのアクセス回数を集計
+                print("リクエストパスごとのアクセス回数:")
+                path_counter = Counter(log['path'] for log in matched_lines)
+                for path, count in path_counter.most_common():
+                    print(f"  - {path}: {count}回")
+            else: # report_by == 'ip' (デフォルト)
+                # IPアドレスごとのアクセス回数を集計
+                print("IPアドレスごとのアクセス回数:")
+                ip_counter = Counter(log['ip'] for log in matched_lines)
+                for ip, count in ip_counter.most_common():
+                    print(f"  - {ip}: {count}回")
 
     except FileNotFoundError:
         logger.error(f"エラー: ログファイル '{log_path}' が見つかりません。")
@@ -84,6 +96,9 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Apacheアクセスログを解析するツール')
     parser.add_argument('logfile', help='解析対象のログファイルパス')
     
+    # 集計方法のオプション
+    parser.add_argument('--report-by', default='ip', choices=['ip', 'path'], help="集計キーを選択 ('ip' または 'path')")
+
     # フィルタリング用のオプションをグループ化
     filter_group = parser.add_mutually_exclusive_group()
     filter_group.add_argument('--ip', help='特定のIPアドレスでフィルタリング')
@@ -91,4 +106,4 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
 
-    parse_log_file(args.logfile, args.ip, args.status)
+    parse_log_file(args.logfile, args.ip, args.status, args.report_by)
